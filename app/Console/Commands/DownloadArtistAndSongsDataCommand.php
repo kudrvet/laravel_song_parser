@@ -2,12 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Services\SoundCloud\SoundCloudApiRequester;
-use App\Services\SoundCloud\SoundCloudService;
 use App\Usecases\DownloadArtistAndSongsDataUsecase;
-use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class DownloadArtistAndSongsDataCommand extends Command
 {
@@ -35,11 +33,11 @@ class DownloadArtistAndSongsDataCommand extends Command
     }
 
     /**
-     * Execute the console command.
-     *
-     * @return int
+     * @param DownloadArtistAndSongsDataUsecase $usecase
+     * @throws GuzzleException
+     * @throws Throwable
      */
-    public function handle(DownloadArtistAndSongsDataUsecase $usecase)
+    public function handle(DownloadArtistAndSongsDataUsecase $usecase): void
     {
         $usecase->handle($this->argument('url'));
         $this->info('Library has been successfully downloaded!');

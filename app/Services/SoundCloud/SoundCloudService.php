@@ -4,8 +4,10 @@ namespace App\Services\SoundCloud;
 
 use App\Services\SoundCloud\DTO\GetSongsByArtistIdOutDto;
 use App\Services\SoundCloud\DTO\SearchArtistDataByUrlOutDto;
+use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
+use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 
 class SoundCloudService
 {
@@ -20,9 +22,10 @@ class SoundCloudService
 
     /**
      * @param string $profileUrl
-     * @return SearchArtistDataByUrlOutDto|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return SearchArtistDataByUrlOutDto
+     * @throws GuzzleException
+     * @throws UnknownProperties
+     * @throws Exception
      */
     public function searchArtistDataByUrl(string $profileUrl): SearchArtistDataByUrlOutDto
     {
@@ -30,30 +33,33 @@ class SoundCloudService
 
         $inner = strstr($html, '{"hydratable":"user"');
         if ($inner == false) {
-            throw new  \Exception('Soundcloud response structure has changed!');
+            throw new  Exception('Soundcloud response structure has changed!');
         }
 
         $data = explode("];</script>", $inner);
 
         if (count($data) < 2) {
-            throw new  \Exception('Soundcloud response structure has changed!');
+            throw new  Exception('Soundcloud response structure has changed!');
         }
 
         $userDataInJson = $data[0];
 
         $userData = json_decode($userDataInJson, true);
         if ($userData === null) {
-            throw new \Exception('Soundcloud response structure has changed!');
+            throw new Exception('Soundcloud response structure has changed!');
         }
 
         return isset($userData['data']) ? new SearchArtistDataByUrlOutDto($userData['data']) :
-            throw new \Exception('Soundcloud response structure has changed!');
+            throw new Exception('Soundcloud response structure has changed!');
     }
 
     /**
      * @param $artistId
-     * @return GetSongsByArtistIdOutDto[]|array
-     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @return GetSongsByArtistIdOutDto[]
+     * @throws UnknownProperties|GuzzleException
+     * @throws Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function getSongsByArtistId($artistId): array
     {
@@ -62,7 +68,7 @@ class SoundCloudService
         $data = $this->decodeJsonResponse((string)$response->getBody());
 
         if (!isset($data['collection'])) {
-            throw new \Exception('Soundcloud response structure has changed!');
+            throw new Exception('Soundcloud response structure has changed!');
         }
         $values = $data['collection'];
         $linkWithRestData = $data['next_href'] ?? null;
@@ -81,9 +87,10 @@ class SoundCloudService
      * @param $artistId
      * @param $link
      * @return array
-     * @throws \Exception
+     * @throws Exception
+     * @throws GuzzleException
      */
-    private function loadRestValues($artistId, $link)
+    private function loadRestValues($artistId, $link): array
     {
         $restValues = [];
         while ($link) {
@@ -91,7 +98,7 @@ class SoundCloudService
             parse_str($query, $queryParams);
 
             if (!isset($queryParams['offset'])) {
-                throw new \Exception('Soundcloud response structure has changed!');
+                throw new Exception('Soundcloud response structure has changed!');
             }
             $offset = $queryParams['offset'];
 
@@ -99,7 +106,7 @@ class SoundCloudService
             $data = $this->decodeJsonResponse((string)$response->getBody());
 
             if (!isset($data['collection'])) {
-                throw new \Exception('Soundcloud response structure has changed!');
+                throw new Exception('Soundcloud response structure has changed!');
             }
 
             $nextValues = $data['collection'];
@@ -113,13 +120,13 @@ class SoundCloudService
     /**
      * @param string $string
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function decodeJsonResponse(string $string): array
     {
         $data = json_decode($string, true);
         if ($data === null) {
-            throw new \Exception('json response expected from soundcloud');
+            throw new Exception('json response expected from soundcloud');
         }
         return $data;
     }

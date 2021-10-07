@@ -3,6 +3,7 @@
 namespace App\Services\SoundCloud;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -18,7 +19,7 @@ class SoundCloudUrlRequester
     /**
      * @param $url
      * @return ResponseInterface
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function get($url): ResponseInterface
     {

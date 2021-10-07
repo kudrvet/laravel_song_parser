@@ -8,7 +8,9 @@ use App\Services\SoundCloud\DTO\GetSongsByArtistIdOutDto;
 use App\Services\SoundCloud\DTO\SearchArtistDataByUrlOutDto;
 use App\Services\SoundCloud\SoundCloudService;
 use App\Services\SoundCloud\SoundCloudUrlRequester;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class DownloadArtistAndSongsDataUsecase
 {
@@ -20,8 +22,8 @@ class DownloadArtistAndSongsDataUsecase
 
     /**
      * @param string $url
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Throwable
+     * @throws GuzzleException
+     * @throws Throwable
      */
     public function handle(string $url): void
     {
@@ -49,7 +51,7 @@ class DownloadArtistAndSongsDataUsecase
     /**
      * @param SearchArtistDataByUrlOutDto $dto
      * @return Artist
-     * @throws \Throwable
+     * @throws Throwable
      */
     private function saveArtistData(SearchArtistDataByUrlOutDto $dto): Artist
     {
@@ -85,7 +87,7 @@ class DownloadArtistAndSongsDataUsecase
     /**
      * @param int $artistId
      * @param GetSongsByArtistIdOutDto[] $songDtos
-     * @throws \Throwable
+     * @throws Throwable
      */
     private function saveSongsData(int $artistId, array $songDtos): void
     {
